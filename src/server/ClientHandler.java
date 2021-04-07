@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.logging.*;
 
 public class ClientHandler {
     private Server server;
@@ -12,9 +13,19 @@ public class ClientHandler {
     private DataOutputStream out;
     private String nickName;
     private String login;
+    private static final Logger logger = Logger.getLogger(""); // подключаю лог
 
     public ClientHandler(Server server, Socket socket) {
-
+        logger.setLevel(Level.ALL);
+        Handler fileHandler = null;
+        try {
+            fileHandler = new FileHandler("server.log");
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        fileHandler.setLevel(Level.ALL);
+        fileHandler.setFormatter(new SimpleFormatter());
+        logger.addHandler(fileHandler);
         try {
             this.server = server;
             this.socket = socket;
@@ -44,12 +55,16 @@ public class ClientHandler {
                                     sendMsg("/authok " + nickName);
                                     server.subscribe(this);
                                     System.out.println("Клиент " + nickName + " подключился");
+                                    logger.log(Level.ALL, "Клиент появился! - " + nickName );
                                     break;
                                 } else {
                                     sendMsg("С данной учетной записью уже зашли");
+                                    logger.log(Level.ALL, "Не пущать! с таким именем клиент уже есть!" + newNick);
                                 }
                             } else {
                                 sendMsg("Неверный логин / пароль");
+                                logger.log(Level.ALL, "Опачки! Неправильный логин або пароль" + nickName);
+
                             }
                         }
 
@@ -94,6 +109,8 @@ public class ClientHandler {
                     e.printStackTrace();
                 } finally {
                     System.out.println("Клиент отключился");
+                    logger.log(Level.ALL, "Упс! клиент свалил! " + nickName);
+
                     server.unsubscribe(this);
                     try {
                         socket.close();
