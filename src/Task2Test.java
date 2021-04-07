@@ -15,7 +15,6 @@ public class Task2Test {
                 {new int[]{4, 3, 7, 5, 4, 4, 3, 2}, new int[]{3, 2}}
         });
     }
-
     private int[] in;
     private int[] out;
 
